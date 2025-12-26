@@ -1,9 +1,8 @@
 import React from 'react';
 import { Card, CardType, Rarity } from '../types';
+import { DexLogo } from './Common';
 
 const CardVisualizer: React.FC<{ card: Card; scale?: number }> = ({ card, scale = 1 }) => {
-  const MASCOT_URL = "https://raw.githubusercontent.com/google/generative-ai-docs/main/site/en/docs/static/dog_with_cards.png";
-
   const rarityStyles = {
     [Rarity.COMMON]: 'border-slate-700 text-slate-300 bg-slate-900 shadow-2xl',
     [Rarity.UNCOMMON]: 'border-emerald-900/50 text-emerald-300 bg-slate-900 shadow-emerald-900/10 shadow-2xl',
@@ -38,15 +37,15 @@ const CardVisualizer: React.FC<{ card: Card; scale?: number }> = ({ card, scale 
         <div className="absolute top-3 left-3 bg-slate-950/90 px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border border-slate-800 backdrop-blur-md shadow-lg">
           {card.type}
         </div>
-        {/* Mascot Branding Watermark */}
-        <img 
-          src={MASCOT_URL} 
-          className="absolute bottom-3 right-3 w-8 h-8 opacity-20 group-hover:opacity-40 pointer-events-none transition-opacity duration-700 invert" 
-          alt="" 
-        />
+        
+        {/* Prominent Holographic Mascot Stamp */}
+        <div className="absolute bottom-2 right-2 z-20 group-hover:scale-125 transition-transform duration-500">
+          <div className="absolute inset-0 bg-blue-400/30 blur-md rounded-full animate-pulse"></div>
+          <DexLogo className="w-10 h-10 relative z-10 drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]" />
+        </div>
       </div>
 
-      {/* Text/Rules Area - Advanced Anti-Truncation */}
+      {/* Text/Rules Area */}
       <div className="bg-slate-950/60 p-4 rounded-[1.5rem] flex-1 border border-white/5 z-10 flex flex-col overflow-hidden backdrop-blur-sm group-hover:bg-slate-950/80 transition-colors">
         <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
           <p className="text-[11px] leading-relaxed font-bold italic text-slate-300 break-words whitespace-pre-wrap">

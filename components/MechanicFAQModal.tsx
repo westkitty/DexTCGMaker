@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { MECHANIC_LIBRARY } from '../mechanics/registry';
-import { Button, CardWrapper, Badge } from './Common';
+import { CardWrapper, Badge, DexLogoMark } from './Common';
 import { ICONS } from '../constants';
 
 interface MechanicFAQModalProps {
@@ -10,7 +11,6 @@ interface MechanicFAQModalProps {
 const MechanicFAQModal: React.FC<MechanicFAQModalProps> = ({ onClose }) => {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<string>('all');
-  const MASCOT_URL = "https://raw.githubusercontent.com/google/generative-ai-docs/main/site/en/docs/static/dog_with_cards.png";
 
   const filtered = MECHANIC_LIBRARY.filter(m => 
     (m.name.toLowerCase().includes(search.toLowerCase()) || m.description.toLowerCase().includes(search.toLowerCase())) &&
@@ -27,15 +27,16 @@ const MechanicFAQModal: React.FC<MechanicFAQModalProps> = ({ onClose }) => {
     <div className="fixed inset-0 z-[1000] bg-slate-950/98 backdrop-blur-xl flex items-center justify-center p-4 md:p-12 overflow-hidden animate-in fade-in duration-300">
       <div className="bg-slate-900 border border-slate-700 w-full max-w-7xl h-full rounded-[3rem] flex flex-col shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden">
         {/* Branding Watermark */}
-        <img src={MASCOT_URL} className="absolute -bottom-20 -right-20 w-[600px] h-[600px] opacity-[0.02] pointer-events-none grayscale invert" alt="" />
+        <div className="absolute -bottom-20 -right-20 w-[600px] h-[600px] opacity-[0.02] pointer-events-none grayscale invert">
+          {/* Fix: changed 'size' to 'className' to match DexLogoMark prop definition */}
+          <DexLogoMark className="w-full h-full" />
+        </div>
 
         {/* Header */}
         <div className="p-10 border-b border-slate-800 flex items-center justify-between bg-slate-900/50 backdrop-blur-md relative z-10">
           <div className="flex items-center gap-6">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
-              <img src={MASCOT_URL} className="w-16 h-16 object-contain relative z-10 drop-shadow-2xl" alt="Mascot" />
-            </div>
+            {/* Fix: changed 'size' to 'className' to match DexLogoMark prop definition */}
+            <DexLogoMark className="w-16 h-16" />
             <div>
               <h2 className="text-4xl font-black flex items-center gap-4 tracking-tighter uppercase">
                 Rules Library
@@ -75,7 +76,7 @@ const MechanicFAQModal: React.FC<MechanicFAQModalProps> = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Content - No Truncation Grid */}
+        {/* Content */}
         <div className="flex-1 overflow-y-auto p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10 custom-scrollbar">
           {filtered.map(mech => (
             <CardWrapper key={mech.id} className="flex flex-col border-slate-800 hover:border-blue-500/30 transition-all group h-fit min-h-[300px]">
@@ -86,11 +87,11 @@ const MechanicFAQModal: React.FC<MechanicFAQModalProps> = ({ onClose }) => {
                 </div>
               </div>
               <h3 className="text-2xl font-black mb-3 text-slate-100 group-hover:text-blue-400 transition-colors uppercase tracking-tight leading-none">{mech.name}</h3>
-              <p className="text-sm text-slate-400 leading-relaxed mb-6 font-medium break-words whitespace-pre-wrap">{mech.description}</p>
+              <p className="text-sm text-slate-400 leading-relaxed mb-6 font-medium whitespace-normal break-words overflow-wrap-anywhere">{mech.description}</p>
               
               <div className="bg-slate-950/80 rounded-[1.5rem] p-5 border border-slate-800 mb-6 flex-1 shadow-inner group-hover:bg-slate-950 transition-colors">
                 <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mb-3">Architect Note</p>
-                <p className="text-[11px] text-slate-300 font-medium italic leading-relaxed">{mech.faq}</p>
+                <p className="text-[11px] text-slate-300 font-medium italic leading-relaxed whitespace-normal break-words overflow-wrap-anywhere">{mech.faq}</p>
               </div>
 
               <div className="mt-auto pt-6 border-t border-slate-800">
@@ -104,7 +105,7 @@ const MechanicFAQModal: React.FC<MechanicFAQModalProps> = ({ onClose }) => {
                      Copy
                    </button>
                 </div>
-                <div className="bg-slate-900 rounded-xl p-4 font-mono text-[11px] text-blue-300 border border-blue-500/10 shadow-lg break-all">
+                <div className="bg-slate-900 rounded-xl p-4 font-mono text-[11px] text-blue-300 border border-blue-500/10 shadow-lg break-all overflow-hidden text-ellipsis">
                   {mech.dslExample}
                 </div>
               </div>

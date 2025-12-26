@@ -5,7 +5,6 @@ export const calculateWinProbability = (state: SimulatorState): number => {
   const p1 = state.players[0];
   const p2 = state.players[1];
   
-  // Heuristic evaluation: Health + Board Presence + Card Advantage
   const p1Power = p1.health + 
     (p1.board.reduce((acc, u) => acc + u.currentAtk + u.currentHp, 0) * 1.5) + 
     (p1.hand.length * 2);
@@ -33,7 +32,6 @@ export const createInitialState = (p1Deck: string[], p2Deck: string[], mechanics
     scores: { lore: 0 }, counters: { poison: 0 }, objectives: []
   };
 
-  // Starting hand size
   const startHand = 3;
   p1.hand = p1.deck.splice(0, startHand);
   p2.hand = p2.deck.splice(0, startHand);
@@ -51,6 +49,20 @@ export const createInitialState = (p1Deck: string[], p2Deck: string[], mechanics
   };
 };
 
+/**
+ * deepClonePlayer - Internal helper to ensure deep immutability for player updates
+ */
+const deepClonePlayer = (player: PlayerState): PlayerState => ({
+  ...player,
+  hand: [...player.hand],
+  deck: [...player.deck],
+  board: player.board.map(u => ({ ...u, keywords: [...u.keywords] })),
+  grave: [...player.grave],
+  scores: { ...player.scores },
+  counters: { ...player.counters },
+  objectives: [...player.objectives]
+});
+
 export const gameReducer = (
   state: SimulatorState, 
   action: { type: string; payload?: any },
@@ -65,10 +77,13 @@ export const gameReducer = (
 
   switch (action.type) {
     case 'NEXT_PHASE': {
-      let newState = { ...state, history: [...state.history, snapshot] };
-      const phases = [GamePhase.DRAW, GamePhase.MAIN, GamePhase.COMBAT, GamePhase.END];
+      let newState = { 
+        ...state, 
+        players: state.players.map(p => deepClonePlayer(p)),
+        history: [...state.history, snapshot] 
+      };
       
-      // Inject Auction if enabled
+      const phases = [GamePhase.DRAW, GamePhase.MAIN, GamePhase.COMBAT, GamePhase.END];
       if (mechanics.find(m => m.id === 'auction_phase')?.isEnabled) {
         if (!phases.includes(GamePhase.AUCTION)) phases.unshift(GamePhase.AUCTION);
       }
@@ -96,19 +111,20 @@ export const gameReducer = (
 
     case 'PLAY_CARD': {
       const { cardIndex, card, targetId } = action.payload;
-      const p = { ...state.players[playerIdx] };
       const c = card as Card;
       
-      if (p.mana < c.cost) return state;
-      p.hand = p.hand.filter((_, i) => i !== cardIndex);
-      p.mana -= c.cost;
+      if (state.players[playerIdx].mana < c.cost) return state;
 
       let newState: SimulatorState = { 
         ...state, 
-        players: state.players.map((pl, i) => i === playerIdx ? p : pl),
+        players: state.players.map(p => deepClonePlayer(p)),
         history: [...state.history, snapshot],
-        logs: [...state.logs, { timestamp: Date.now(), message: `${p.name} played ${c.name}`, type: 'action' }] 
+        logs: [...state.logs, { timestamp: Date.now(), message: `${state.players[playerIdx].name} played ${c.name}`, type: 'action' }] 
       };
+
+      const p = newState.players[playerIdx];
+      p.hand = p.hand.filter((_, i) => i !== cardIndex);
+      p.mana -= c.cost;
 
       const effects = DSLEngine.parse(c.dsl);
       newState = applyDSLEffects(newState, effects, playerIdx, targetId, cardLibrary);
@@ -123,7 +139,7 @@ export const gameReducer = (
           isExhausted: !keywords.some(k => k.toLowerCase() === 'rush'),
           keywords
         };
-        newState.players[playerIdx].board = [...newState.players[playerIdx].board, newUnit];
+        p.board = [...p.board, newUnit];
       }
 
       return checkAllWinConditions(newState, mechanics);
@@ -131,7 +147,12 @@ export const gameReducer = (
 
     case 'ATTACK': {
       const { attackerId, targetId } = action.payload;
-      let newState = { ...state, history: [...state.history, snapshot] };
+      let newState: SimulatorState = { 
+        ...state, 
+        players: state.players.map(p => deepClonePlayer(p)),
+        history: [...state.history, snapshot] 
+      };
+
       const p = newState.players[playerIdx];
       const opp = newState.players[oppIdx];
       
@@ -142,7 +163,7 @@ export const gameReducer = (
       const targetUnit = opp.board.find(u => u.instanceId === targetId);
       
       if (hasTaunt && (!targetUnit || !targetUnit.keywords.some(k => k.toLowerCase() === 'taunt'))) {
-        newState.logs.push({ timestamp: Date.now(), message: 'Combat Blocked: Must attack Taunt!', type: 'rule' });
+        newState.logs = [...newState.logs, { timestamp: Date.now(), message: 'Combat Blocked: Must attack Taunt!', type: 'rule' }];
         return state;
       }
 
@@ -151,15 +172,14 @@ export const gameReducer = (
         if (attacker.keywords.some(k => k.toLowerCase() === 'lifesteal')) {
           p.health = Math.min(p.maxHealth, p.health + attacker.currentAtk);
         }
-        // Fix: Changed attacker.attackerId to attacker.instanceId because BoardInstance doesn't have attackerId
-        newState.logs.push({ timestamp: Date.now(), message: `${attacker.instanceId || 'Unit'} attacks Face for ${attacker.currentAtk}`, type: 'damage' });
+        newState.logs = [...newState.logs, { timestamp: Date.now(), message: `Unit attacks Face for ${attacker.currentAtk}`, type: 'damage' }];
       } else if (targetUnit) {
         targetUnit.currentHp -= attacker.currentAtk;
         attacker.currentHp -= targetUnit.currentAtk;
         if (attacker.keywords.some(k => k.toLowerCase() === 'lifesteal')) {
           p.health = Math.min(p.maxHealth, p.health + attacker.currentAtk);
         }
-        newState.logs.push({ timestamp: Date.now(), message: `Combat: ${attackerId} vs ${targetId}`, type: 'damage' });
+        newState.logs = [...newState.logs, { timestamp: Date.now(), message: `Combat Damage Exchanged: ${attacker.currentAtk} vs ${targetUnit.currentAtk}`, type: 'damage' }];
       }
 
       attacker.isExhausted = true;
@@ -170,12 +190,16 @@ export const gameReducer = (
     case 'BID': {
       if (state.phase !== GamePhase.AUCTION) return state;
       const { amount } = action.payload;
-      const p = { ...state.players[playerIdx] };
-      if (p.mana < amount) return state;
-      p.mana -= amount;
-      let newState = { ...state, history: [...state.history, snapshot] };
-      newState.players[playerIdx] = p;
-      newState.logs.push({ timestamp: Date.now(), message: `${p.name} bids ${amount} resource!`, type: 'action' });
+      if (state.players[playerIdx].mana < amount) return state;
+
+      let newState: SimulatorState = { 
+        ...state, 
+        players: state.players.map(p => deepClonePlayer(p)),
+        history: [...state.history, snapshot] 
+      };
+      
+      newState.players[playerIdx].mana -= amount;
+      newState.logs = [...newState.logs, { timestamp: Date.now(), message: `${newState.players[playerIdx].name} bids ${amount} resource!`, type: 'action' }];
       return newState;
     }
 
@@ -198,7 +222,6 @@ const applyDSLEffects = (state: SimulatorState, effects: DSLEffect[], playerIdx:
     if (eff.trigger === 'OnPlay' || eff.trigger === 'Victory' || eff.trigger === 'Global') {
       const action = eff.action.toLowerCase();
       
-      // Damage handling
       if (action.includes('deal') || action.includes('damage')) {
         const val = eff.value || 0;
         if (targetId === newState.players[oppIdx].id) {
@@ -209,7 +232,6 @@ const applyDSLEffects = (state: SimulatorState, effects: DSLEffect[], playerIdx:
         }
       }
 
-      // Draw handling
       if (action.includes('draw')) {
         const val = eff.value || 1;
         for (let i = 0; i < val; i++) {
@@ -218,7 +240,6 @@ const applyDSLEffects = (state: SimulatorState, effects: DSLEffect[], playerIdx:
         }
       }
 
-      // Buff handling
       if (action.includes('buff') || action.includes('gain')) {
         const val = eff.value || 1;
         const unit = newState.players[playerIdx].board.find(u => u.instanceId === targetId);
@@ -228,14 +249,12 @@ const applyDSLEffects = (state: SimulatorState, effects: DSLEffect[], playerIdx:
         }
       }
 
-      // Score Handling
       if (action.includes('addscore')) {
         const type = eff.params?.scoreType || 'lore';
         const val = eff.params?.amount || 1;
         newState.players[playerIdx].scores[type] = (newState.players[playerIdx].scores[type] || 0) + val;
       }
       
-      // Weather handling
       if (action === 'setweather') {
         newState.weather = eff.params?.name || 'Clear';
       }
@@ -276,7 +295,6 @@ const processTrigger = (state: SimulatorState, triggerType: string, playerIdx: n
   if (specificCard) {
     applyForCard(specificCard, playerIdx);
   } else {
-    // Board-wide trigger check
     newState.players.forEach((p, pIdx) => {
       p.board.forEach(u => {
         const card = cardLibrary.find(c => c.id === u.cardId);
@@ -290,7 +308,7 @@ const processTrigger = (state: SimulatorState, triggerType: string, playerIdx: n
 
 const applyDrawPhaseLogic = (state: SimulatorState, mechanics: MechanicDefinition[]): SimulatorState => {
   const pIdx = state.turnOwnerIndex;
-  const p = { ...state.players[pIdx] };
+  const p = deepClonePlayer(state.players[pIdx]);
   
   const manaMech = mechanics.find(m => m.id === 'm2' || m.id === 'mana_pool');
   const cap = manaMech?.isEnabled ? (manaMech.parameters.cap || 10) : 10;
@@ -298,7 +316,7 @@ const applyDrawPhaseLogic = (state: SimulatorState, mechanics: MechanicDefinitio
   p.maxMana = Math.min(cap, state.turnCount);
   p.mana = p.maxMana;
 
-  const newState = { ...state };
+  let newState = { ...state, players: [...state.players] };
   if (p.deck.length > 0) {
     p.hand.push(p.deck.shift()!);
   } else {
@@ -308,9 +326,8 @@ const applyDrawPhaseLogic = (state: SimulatorState, mechanics: MechanicDefinitio
     }
   }
 
+  p.board.forEach(u => u.isExhausted = false);
   newState.players[pIdx] = p;
-  // Reset unit exhaustion
-  newState.players[pIdx].board.forEach(u => u.isExhausted = false);
 
   return newState;
 };
@@ -322,10 +339,8 @@ const checkAllWinConditions = (state: SimulatorState, mechanics: MechanicDefinit
     const pIdx = state.players.indexOf(player);
     const oppIdx = (pIdx + 1) % 2;
 
-    // Standard Health Win
     if (player.health <= 0) return { ...state, victoryStatus: { winner: oppIdx, reason: 'Health Depleted' } };
 
-    // Point Scoring (Lore/Points)
     const scoreMech = mechanics.find(m => m.id === 'win_con_score');
     if (scoreMech?.isEnabled) {
       const type = scoreMech.parameters.scoreType || 'lore';
@@ -335,21 +350,17 @@ const checkAllWinConditions = (state: SimulatorState, mechanics: MechanicDefinit
       }
     }
 
-    // Unit Swarm
     const unitMech = mechanics.find(m => m.id === 'win_con_units');
     if (unitMech?.isEnabled && player.board.length >= (unitMech.parameters.count || 7)) {
        return { ...state, victoryStatus: { winner: pIdx, reason: `Swarm Control (${player.board.length} Units)` } };
     }
 
-    // Time/Turn Limit
     const timeMech = mechanics.find(m => m.id === 'win_con_time');
     if (timeMech?.isEnabled && state.turnCount >= (timeMech.parameters.turn || 15)) {
-       // Usually whoever has more health wins at time
        const winner = state.players[0].health >= state.players[1].health ? 0 : 1;
        return { ...state, victoryStatus: { winner, reason: 'Time Limit (Turn Cap)' } };
     }
 
-    // Counters (Poison etc)
     const counterMech = mechanics.find(m => m.id === 'win_con_counters');
     if (counterMech?.isEnabled) {
       const type = counterMech.parameters.counter || 'poison';

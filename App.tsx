@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Layout from './components/Layout';
 import { ViewType, Card, MechanicDefinition, Deck, Scenario } from './types';
@@ -23,7 +22,6 @@ const App: React.FC = () => {
   const [isFAQOpen, setIsFAQOpen] = useState(false);
   const [showLaunchScreen, setShowLaunchScreen] = useState(true);
 
-  // Core Data State
   const [cards, setCards] = useState<Card[]>([]);
   const [mechanics, setMechanics] = useState<MechanicDefinition[]>([]);
   const [decks, setDecks] = useState<Deck[]>([]);
@@ -39,7 +37,6 @@ const App: React.FC = () => {
     setMechanics(loadedMechanics.length > 0 ? loadedMechanics : MECHANIC_LIBRARY);
     setDecks(loadedDecks);
 
-    // Check if user has already seen the launch screen in this session
     const hasSeen = sessionStorage.getItem('dextcgm_launched');
     if (hasSeen) {
       setShowLaunchScreen(false);
@@ -92,22 +89,19 @@ const App: React.FC = () => {
       {showLaunchScreen && <LaunchScreen onStart={handleStartApp} />}
       
       {!showLaunchScreen && (
-        <>
-          <Layout activeView={activeView} setView={setActiveView}>
-            <div className="absolute top-8 right-8 z-10">
-              <button 
-                onClick={() => setIsFAQOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 border border-slate-700 hover:border-blue-500/50 hover:bg-slate-800 text-slate-300 rounded-xl transition-all shadow-xl backdrop-blur-sm group"
-              >
-                <span className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center text-[10px] font-bold text-white group-hover:scale-110 transition-transform">?</span>
-                <span className="text-sm font-semibold tracking-tight">Rules Library</span>
-              </button>
-            </div>
-            {renderContent()}
-          </Layout>
-
+        <Layout activeView={activeView} setView={setActiveView}>
+          <div className="absolute top-8 right-8 z-10">
+            <button 
+              onClick={() => setIsFAQOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 border border-slate-700 hover:border-blue-500/50 hover:bg-slate-800 text-slate-300 rounded-xl transition-all shadow-xl backdrop-blur-sm group"
+            >
+              <span className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center text-[10px] font-bold text-white group-hover:scale-110 transition-transform">?</span>
+              <span className="text-sm font-semibold tracking-tight">Rules Library</span>
+            </button>
+          </div>
+          {renderContent()}
           {isFAQOpen && <MechanicFAQModal onClose={() => setIsFAQOpen(false)} />}
-        </>
+        </Layout>
       )}
     </div>
   );

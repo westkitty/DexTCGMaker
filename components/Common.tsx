@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 
+// Exported for backward compatibility but using the brand centralized system
+export { DexLogoMark as DexLogo, DexLogoMark } from '../brand/DexLogoMark';
+
 export const Button: React.FC<{
   onClick?: () => void;
   children: React.ReactNode;
@@ -35,7 +38,7 @@ export const Tooltip: React.FC<{ text: string; children: React.ReactNode }> = ({
       {children}
       {visible && (
         <div className="absolute z-[300] bottom-full mb-3 left-1/2 -translate-x-1/2 w-56 p-3 bg-slate-950 border border-slate-700 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200">
-          <p className="text-[11px] font-medium text-slate-200 leading-relaxed">{text}</p>
+          <p className="text-[11px] font-medium text-slate-200 leading-relaxed whitespace-normal break-words overflow-wrap-anywhere">{text}</p>
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-700"></div>
         </div>
       )}

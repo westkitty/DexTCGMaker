@@ -1,20 +1,24 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# DexTCGMaker - TCG Design & Simulation Lab
 
-# Run and deploy your AI Studio app
+## Brand Identity
 
-This contains everything you need to run your app locally.
+The official brand for DexTCGMaker is the **Tricolor Dog holding Trading Cards**.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1ghfPxyHmQaJLnG11MblzXgOu1-fbvcEF
+### Usage Rules
+- All brand rendering MUST be done through the `<DexLogoMark />` component.
+- The logo must be present in the header, navigation, and all empty states.
+- The logo is a pure vector SVG asset located in `brand/DexLogoMark.tsx`.
 
-## Run Locally
+### Vectorization Workflow (Inkscape)
+If you need to update the vector source:
+1. Open original raster image in Inkscape.
+2. Select the image.
+3. Go to `Path > Trace Bitmap`.
+4. Use `Multiple Scans (Colors)` for best fidelity.
+5. Remove background and simplify paths.
+6. Save as `Plain SVG`.
+7. Ensure the result contains only `<path>`, `<g>`, and `<defs>` (NO `<image>` tags).
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Text Visibility Rules
+- To ensure maximum readability, text truncation is forbidden for rules and mechanics.
+- All containers use `white-space: normal; overflow-wrap: anywhere;`.

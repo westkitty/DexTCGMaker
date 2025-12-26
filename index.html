@@ -18,49 +18,36 @@
         .font-mono {
             font-family: 'JetBrains+Mono', monospace;
         }
+
+        /* PHASE 5: ANTI-TRUNCATION GLOBAL ENFORCEMENT */
+        p, span, div, label, h1, h2, h3, h4, h5, h6, li, blockquote, .break-words {
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+            word-break: normal !important;
+            text-overflow: clip !important;
+        }
+
         /* Custom scrollbar for dark mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 20px;
-            border: 2px solid rgba(15, 23, 42, 0.5);
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #334155;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        /* Anti-Truncation Utilities */
-        .break-words {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 10px;
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
     </style>
 <script type="importmap">
 {
   "imports": {
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@testing-library/react": "https://esm.sh/@testing-library/react@^16.3.1",
+    "@jest/globals": "https://esm.sh/@jest/globals@^30.2.0",
+    "@testing-library/jest-dom": "https://esm.sh/@testing-library/jest-dom@^6.9.1"
   }
 }
 </script>
 </head>
 <body>
     <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>
