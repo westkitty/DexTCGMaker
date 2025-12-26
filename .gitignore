@@ -11,6 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
+.tmp
+src/assets/dex-logo.png
+public/dex-logo.png
 
 # Editor directories and files
 .vscode/*

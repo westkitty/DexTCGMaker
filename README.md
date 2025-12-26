@@ -7,7 +7,10 @@ The official brand for DexTCGMaker is the **Tricolor Dog holding Trading Cards**
 ### Usage Rules
 - All brand rendering MUST be done through the `<DexLogoMark />` component.
 - The logo must be present in the header, navigation, and all empty states.
-- The logo is a pure vector SVG asset located in `brand/DexLogoMark.tsx`.
+- The canonical logo component lives at `src/brand/DexLogoMark.tsx` and renders the real `src/assets/dex-logo.png` image (Tricolor Dog holding Trading Cards).
+- The logo file is **not tracked in git**. Provide it before builds by either:
+  - Placing the real PNG at `src/assets/dex-logo.png`, or
+  - Setting `DEX_LOGO_URL` (http/https/file) and running `npm run fetch:logo`.
 
 ### Vectorization Workflow (Inkscape)
 If you need to update the vector source:

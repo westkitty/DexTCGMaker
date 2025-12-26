@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DexLogoMark } from '../brand/DexLogoMark';
+import { DexLogoMark } from '@/brand/DexLogoMark';
 
 interface EmptyStateProps {
   message: string;
