@@ -1,27 +1,40 @@
+import assert from 'node:assert';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { describe, test, expect } from '@jest/globals';
+import { renderToStaticMarkup } from 'react-dom/server';
 import Layout from '../components/Layout';
 import EmptyState from '../components/EmptyState';
+import { DexLogoMark } from '@/brand/DexLogoMark';
 
-describe('DexTCGMaker Brand Identity Proof', () => {
-  test('App must render at least 3 instances of the brand logo in the main layout shell', () => {
-    render(<Layout activeView="Overview" setView={() => {}} children={<div>Test Content</div>} />);
-    
-    // We query by aria-label to prove the brand component is used
-    const logos = screen.getAllByLabelText("DexTCGMaker logo");
-    
-    // PROOF: Header (1), Nav Brand (1), Active Nav Icon (1) = 3 total
-    expect(logos.length).toBeGreaterThanOrEqual(3);
-  });
+const countLogos = (markup: string) =>
+  (markup.match(/aria-label="DexTCGMaker logo"/g) ?? []).length;
 
-  test('EmptyState component must render the brand logo for consistent user experience', () => {
-    render(<EmptyState message="Nothing here" />);
-    const logo = screen.getByLabelText("DexTCGMaker logo");
-    expect(logo).toBeInTheDocument();
-    
-    // Assert visual styles
-    expect(logo).toHaveStyle({ objectFit: 'contain' });
-  });
-});
+// App shell should always render at least three logo instances (header + nav + footer badge)
+const layoutMarkup = renderToStaticMarkup(
+  <Layout activeView="Overview" setView={() => {}} children={<div>Test Content</div>} />
+);
+assert.ok(
+  countLogos(layoutMarkup) >= 3,
+  `Expected at least 3 DexTCGMaker logo instances in Layout, found ${countLogos(layoutMarkup)}`
+);
+
+// Empty state must carry brand identity for blank slates
+const emptyMarkup = renderToStaticMarkup(<EmptyState message="Nothing here" />);
+assert.ok(
+  countLogos(emptyMarkup) >= 1,
+  'EmptyState is missing the DexTCGMaker logo (aria-label search)'
+);
+
+// Logo component must point at the bundled PNG and expose aria metadata
+const logoMarkup = renderToStaticMarkup(<DexLogoMark className="w-10 h-10" />);
+assert.ok(
+  logoMarkup.includes('aria-label="DexTCGMaker logo"'),
+  'DexLogoMark is missing the required aria-label'
+);
+assert.ok(
+  /src="[^"]*dex-logo\.png"/.test(logoMarkup),
+  'DexLogoMark src does not point at dex-logo.png'
+);
+assert.ok(
+  /alt="DexTCGMaker logo"/.test(logoMarkup),
+  'DexLogoMark alt text is missing or incorrect'
+);

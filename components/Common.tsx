@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 // Exported for backward compatibility but using the brand centralized system
-export { DexLogoMark as DexLogo, DexLogoMark } from '../brand/DexLogoMark';
+export { DexLogoMark as DexLogo, DexLogoMark } from '@/brand/DexLogoMark';
 
 export const Button: React.FC<{
   onClick?: () => void;

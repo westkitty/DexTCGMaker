@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ICONS } from '../constants';
 import { ViewType } from '../types';
-import { DexLogoMark } from '../brand/DexLogoMark';
+import { DexLogoMark } from '@/brand/DexLogoMark';
 
 interface LayoutProps {
   children: React.ReactNode;

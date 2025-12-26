@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from './Common';
-import { DexLogoMark } from '../brand/DexLogoMark';
+import { DexLogoMark } from '@/brand/DexLogoMark';
 
 interface LaunchScreenProps {
   onStart: () => void;

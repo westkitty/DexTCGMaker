@@ -10,7 +10,7 @@ import AppHeader from '../components/AppHeader';
 import Layout from '../components/Layout';
 import EmptyState from '../components/EmptyState';
 import MechanicFAQModal from '../components/MechanicFAQModal';
-import { DexLogoMark } from '../brand/DexLogoMark';
+import { DexLogoMark } from '@/brand/DexLogoMark';
 
 describe('DexTCGMaker Branding Enforcement', () => {
   test('AppHeader must render DexLogoMark', () => {

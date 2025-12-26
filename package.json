@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "prebuild": "npm run fetch:logo && npm run check:logo",
+    "preview": "vite preview",
+    "fetch:logo": "node scripts/fetch-logo.js",
+    "test": "node scripts/run-tests.js",
+    "check:logo": "node scripts/check-logo.js"
   },
   "dependencies": {
     "react": "^19.2.3",
