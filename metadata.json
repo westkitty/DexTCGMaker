@@ -1,0 +1,7 @@
+{
+  "name": "DexTCGMaker",
+  "description": "A comprehensive TCG design and simulation lab featuring a mechanic ruleset editor, card collection manager, deck builder, and interactive sandbox simulator with rule enforcement.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
