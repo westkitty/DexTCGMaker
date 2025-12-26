@@ -1,4 +1,3 @@
-
 import { MechanicDefinition } from '../types';
 
 export const MECHANIC_LIBRARY: MechanicDefinition[] = [

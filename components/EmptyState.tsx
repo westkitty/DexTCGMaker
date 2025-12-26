@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DexLogoMark } from '../brand/DexLogoMark';
 
@@ -12,8 +13,8 @@ interface EmptyStateProps {
  */
 const EmptyState: React.FC<EmptyStateProps> = ({ message, submessage, icon }) => {
   return (
-    <div className="flex flex-col items-center justify-center py-24 px-8 text-center animate-in fade-in duration-700 overflow-visible">
-      <div className="mb-12 overflow-visible">
+    <div className="flex flex-col items-center justify-center py-24 px-8 text-center animate-in fade-in duration-700">
+      <div className="mb-12">
         <DexLogoMark className="w-32 h-32 md:w-40 md:h-40" />
       </div>
       
@@ -24,7 +25,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ message, submessage, icon }) =>
       </h3>
       
       {submessage && (
-        <p className="text-sm font-bold text-slate-600 max-w-md mx-auto leading-relaxed overflow-wrap-anywhere whitespace-normal">
+        <p className="text-sm font-bold text-slate-600 max-w-md mx-auto leading-relaxed">
           {submessage}
         </p>
       )}

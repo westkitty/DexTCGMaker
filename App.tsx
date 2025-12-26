@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewType>('Overview');
   const [isFAQOpen, setIsFAQOpen] = useState(false);
   const [showLaunchScreen, setShowLaunchScreen] = useState(true);
+  const [brandError, setBrandError] = useState(false);
 
   const [cards, setCards] = useState<Card[]>([]);
   const [mechanics, setMechanics] = useState<MechanicDefinition[]>([]);
@@ -42,6 +43,31 @@ const App: React.FC = () => {
       setShowLaunchScreen(false);
     }
   }, []);
+
+  // Branding Integrity Monitor
+  useEffect(() => {
+    if (showLaunchScreen) return;
+
+    const auditBranding = () => {
+      // Query for the DexLogoMark by its specific aria-label
+      const logos = document.querySelectorAll('[aria-label="DexTCGMaker logo"]');
+      if (logos.length < 3) {
+        console.warn(`Branding Guard: Detected only ${logos.length} logos. Expecting 3.`);
+        // We only trigger hard error if it stays low after initial transition
+        setTimeout(() => {
+            const finalCount = document.querySelectorAll('[aria-label="DexTCGMaker logo"]').length;
+            if (finalCount < 3) {
+                setBrandError(true);
+            }
+        }, 1500);
+      } else {
+        setBrandError(false);
+      }
+    };
+
+    const timer = setTimeout(auditBranding, 2000);
+    return () => clearTimeout(timer);
+  }, [showLaunchScreen, activeView]);
 
   useEffect(() => {
     if (cards.length > 0) StorageService.saveCards(cards);
@@ -83,6 +109,25 @@ const App: React.FC = () => {
         return <Overview cards={cards} decks={decks} onLoadScenario={handleLoadScenario} />;
     }
   };
+
+  if (brandError) {
+    return (
+      <div className="h-screen bg-red-950 text-white flex flex-col items-center justify-center p-10 text-center animate-in fade-in duration-500">
+        <h1 className="text-4xl font-black mb-4">BRANDING INTEGRITY ERROR</h1>
+        <p className="max-w-md opacity-70">
+          The DexTCGMaker logo failed to render in the required locations (Header, Navigation, and Main View). 
+          The application has been halted to prevent brand dilution.
+        </p>
+        <p className="mt-4 text-xs font-mono text-red-400">Error: LOGO_COUNT_INSUFFICIENT</p>
+        <button 
+          onClick={() => setBrandError(false)} 
+          className="mt-8 px-8 py-3 bg-white text-red-950 font-black rounded-xl hover:bg-red-100 transition-colors uppercase text-sm"
+        >
+          Attempt Hotfix Bypass
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
